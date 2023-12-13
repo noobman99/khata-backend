@@ -17,7 +17,8 @@ exports.newTransaction = async (req, res, next) => {
     req.body.reason,
     req.body.date
   );
-  db.query(transaction.insert_query, transaction.insert_params())
+  console.log("new transaction", transaction);
+  db.query(Transaction.insert_query, transaction.insert_params())
     .then(([rows, fields]) => {
       res.status(200).json(rows);
     })
@@ -28,12 +29,12 @@ exports.newTransaction = async (req, res, next) => {
 
 exports.updateTransaction = async (req, res, next) => {
   const transaction = new Transaction(
-    req.params.id,
     req.body.amount,
     req.body.reason,
-    req.body.date
+    req.body.date,
+    req.params.id
   );
-  db.query(transaction.update_query, transaction.update_params())
+  db.query(Transaction.update_query, transaction.update_params())
     .then(([rows, fields]) => {
       res.status(200).json(rows);
     })
