@@ -8,6 +8,8 @@ exports.getTransactions = async (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
+      res.status(500);
+      res.send("Server error. Please try again later");
     });
 };
 
@@ -15,7 +17,8 @@ exports.newTransaction = async (req, res, next) => {
   const transaction = new Transaction(
     req.body.amount,
     req.body.reason,
-    req.body.date
+    req.body.date,
+    req.body.category
   );
   console.log("new transaction", transaction);
   db.query(Transaction.insert_query, transaction.insert_params())
@@ -24,6 +27,8 @@ exports.newTransaction = async (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
+      res.status(500);
+      res.send("Server Error. Please try again later");
     });
 };
 
@@ -32,6 +37,7 @@ exports.updateTransaction = async (req, res, next) => {
     req.body.amount,
     req.body.reason,
     req.body.date,
+    req.body.category,
     req.params.id
   );
   db.query(Transaction.update_query, transaction.update_params())
@@ -40,6 +46,8 @@ exports.updateTransaction = async (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
+      res.status(500);
+      res.send("Server Error. Please try again later");
     });
 };
 
@@ -50,5 +58,7 @@ exports.deleteTransaction = async (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
+      res.status(500);
+      res.send("Server Error. Please try again later");
     });
 };
