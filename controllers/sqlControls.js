@@ -8,8 +8,10 @@ exports.getTransactions = async (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      res.status(500);
-      res.send("Server error. Please try again later");
+      res.status(500).json({
+        success: false,
+        error: "Server error. Please try again later",
+      });
     });
 };
 
@@ -27,8 +29,10 @@ exports.newTransaction = async (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      res.status(500);
-      res.send("Server Error. Please try again later");
+      res.status(500).json({
+        success: false,
+        error: "Server error. Please try again later",
+      });
     });
 };
 
@@ -46,8 +50,10 @@ exports.updateTransaction = async (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      res.status(500);
-      res.send("Server Error. Please try again later");
+      res.status(500).json({
+        success: false,
+        error: "Server error. Please try again later",
+      });
     });
 };
 
@@ -58,7 +64,9 @@ exports.deleteTransaction = async (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      res.status(500);
-      res.send("Server Error. Please try again later");
+      res.status(500).json({
+        success: false,
+        error: "Server error. Please try again later",
+      });
     });
 };
