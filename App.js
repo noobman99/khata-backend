@@ -13,10 +13,10 @@ app.use(express.json());
 app.post("/signup", authControls.signup);
 app.post("/login", authControls.login);
 
-app.put("/transacations/:id", sqlControls.updateTransaction);
-app.delete("/transacations/:id", sqlControls.deleteTransaction);
-app.get("/transacations", sqlControls.getTransactions);
-app.post("/transacations", sqlControls.newTransaction);
+app.put("/transactions/:id", sqlControls.updateTransaction);
+app.delete("/transactions/:id", sqlControls.deleteTransaction);
+app.get("/transactions", sqlControls.getTransactions);
+app.post("/transactions", sqlControls.newTransaction);
 
 mongoose.connect(process.env.MONGO_DB_URI).then(() => {
   console.log("Connected to MongoDB");
