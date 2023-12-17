@@ -21,6 +21,21 @@ class Transaction {
   update_params() {
     return [this.amount, this.reason, this.date, this.category, this.id];
   }
+
+  static async create_table(name) {
+    const createQuery = `CREATE TABLE ${name} (rowid int NOT NULL AUTO_INCREMENT, amount int NOT NULL, reason varchar(50) NOT NULL, date char(10) NOT NULL, category varchar(20) NOT NULL, PRIMARY KEY (rowid))`;
+
+    try {
+      const result = await db.query(createQuery);
+      console.log(result);
+      return result;
+    } catch (err) {
+      console.log(err);
+      throw new Error(
+        "Server cannot process your request at this time. Please try again later"
+      );
+    }
+  }
 }
 
 module.exports = Transaction;

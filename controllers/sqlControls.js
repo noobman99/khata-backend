@@ -1,5 +1,5 @@
 const db = require("../connections/db");
-const Transaction = require("../models/transaction");
+const Transaction = require("../models/Transaction");
 
 exports.getTransactions = async (req, res, next) => {
   db.query(Transaction.get_all_query)

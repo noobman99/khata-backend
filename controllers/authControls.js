@@ -2,9 +2,24 @@ const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Transaction = require("../models/Transaction");
 
 const createToken = (data) => {
   return jwt.sign({ data }, process.env.JWT_SECRET, { expiresIn: "1h" });
+};
+
+const RandomString = (length) => {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  let randString = "";
+  while (randString.length < length) {
+    randString += characters.charAt(
+      Math.floor(Math.random() * characters.length)
+    );
+  }
+
+  return randString;
 };
 
 exports.signup = async (req, res, next) => {
@@ -18,7 +33,7 @@ exports.signup = async (req, res, next) => {
     res.status(400).json({ success: false, error: "Invalid email" });
   }
 
-  const user = await User.findOne({ email });
+  let user = await User.findOne({ email });
 
   if (user) {
     res.status(400).json({ success: false, error: "Email already in use" });
@@ -27,11 +42,24 @@ exports.signup = async (req, res, next) => {
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password, salt);
 
+  let tId;
+  do {
+    tId = RandomString(15);
+    user = await User.findOne({ tId });
+  } while (user);
+  console.log(tId);
+
+  user = null;
+
   try {
-    const user = await User.create({ username, email, password: hash });
+    user = await User.create({ username, email, password: hash, tId });
+    await Transaction.create_table(tId);
     const token = createToken(user._id);
     res.status(201).json({ success: true, token, username });
   } catch (err) {
+    if (user) {
+      User.findByIdAndDelete(user._id);
+    }
     res.status(500).json({ success: false, error: err.message });
   }
 };
