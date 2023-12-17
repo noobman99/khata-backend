@@ -16,8 +16,8 @@ const authenticator = async (req, res, next) => {
   try {
     const { id } = jwt.verify(authToken, process.env.JWT_SECRET);
 
-    const user = await User.findById(id).select("email");
-    req.user = user;
+    const user = await User.findById(id);
+    req.tId = user.tId;
     next();
   } catch (err) {
     if (err.name === "TokenExpiredError") {

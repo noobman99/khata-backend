@@ -4,8 +4,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 
-const createToken = (data) => {
-  return jwt.sign({ data }, process.env.JWT_SECRET, { expiresIn: "1h" });
+const createToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
 
 const RandomString = (length) => {
@@ -53,7 +53,7 @@ exports.signup = async (req, res, next) => {
 
   try {
     user = await User.create({ username, email, password: hash, tId });
-    await Transaction.create_table(tId);
+    await Transaction.createTable(tId);
     const token = createToken(user._id);
     res.status(201).json({ success: true, token, username });
   } catch (err) {
