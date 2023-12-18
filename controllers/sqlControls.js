@@ -44,8 +44,8 @@ exports.newTransaction = async (req, res, next) => {
     });
   }
 
-  console.log("new transaction", transaction);
-  db.query(transaction.insertQuery, transaction.insert_params())
+  // console.log("new transaction", transaction);
+  db.query(transaction.insertQuery, transaction.insertParams())
     .then(([rows, fields]) => {
       res.status(200).json(rows);
     })
