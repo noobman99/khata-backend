@@ -1,8 +1,8 @@
-const db = require("../connections/db");
 const Transaction = require("../models/Transaction");
 
 exports.getTransactions = async (req, res, next) => {
-  let transaction;
+  var transaction;
+
   try {
     transaction = new Transaction(req.tId);
   } catch (err) {
@@ -13,29 +13,25 @@ exports.getTransactions = async (req, res, next) => {
     });
   }
 
-  db.query(transaction.getAllQuery)
-    .then(([rows, fields]) => {
-      res.status(200).json(rows);
+  transaction
+    .getAll()
+    .then((data) => {
+      res.status(200).json(data);
     })
     .catch((err) => {
       console.log(err);
       res.status(500).json({
         success: false,
-        error: "Server error. Please try again later",
+        error: err.message,
       });
     });
 };
 
 exports.newTransaction = async (req, res, next) => {
-  let transaction;
+  var transaction;
+
   try {
     transaction = new Transaction(req.tId);
-    transaction.setDetails(
-      req.body.amount,
-      req.body.reason,
-      req.body.date,
-      req.body.category
-    );
   } catch (err) {
     console.log("Error: ", err.message);
     res.status(500).json({
@@ -44,54 +40,63 @@ exports.newTransaction = async (req, res, next) => {
     });
   }
 
-  // console.log("new transaction", transaction);
-  db.query(transaction.insertQuery, transaction.insertParams())
-    .then(([rows, fields]) => {
-      res.status(200).json(rows);
+  transaction
+    .insert(req.body.amount, req.body.reason, req.body.date, req.body.category)
+    .then((data) => {
+      res.status(200).json(data);
     })
     .catch((err) => {
       console.log(err);
       res.status(500).json({
         success: false,
-        error: "Server error. Please try again later",
+        error: err.message,
       });
     });
 };
 
 exports.updateTransaction = async (req, res, next) => {
-  let transaction;
+  var transaction;
+
   try {
     transaction = new Transaction(req.tId);
-    transaction.setDetails(
+  } catch (err) {
+    console.log("Error: ", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Server error. Please try again later",
+    });
+  }
+
+  transaction
+    .update(
       req.body.amount,
       req.body.reason,
       req.body.date,
       req.body.category,
       req.params.id
-    );
-  } catch (err) {
-    console.log("Error: ", err.message);
-    res.status(500).json({
-      success: false,
-      error: "Server error. Please try again later",
-    });
-  }
-
-  db.query(transaction.updateQuery, transaction.updateParams())
-    .then(([rows, fields]) => {
-      res.status(200).json(rows);
+    )
+    .then((data) => {
+      if (data == 0) {
+        res.status(404).json({
+          success: false,
+          error: "Could not update transaction. Please try again later.",
+        });
+      } else {
+        res.status(200).json(data);
+      }
     })
     .catch((err) => {
       console.log(err);
       res.status(500).json({
         success: false,
-        error: "Server error. Please try again later",
+        error: "Could not update transaction. Please try again later.",
       });
     });
 };
 
 exports.deleteTransaction = async (req, res, next) => {
-  let transaction;
+  var transaction;
+
   try {
     transaction = new Transaction(req.tId);
   } catch (err) {
@@ -102,15 +107,23 @@ exports.deleteTransaction = async (req, res, next) => {
     });
   }
 
-  db.query(transaction.deleteQuery, [req.params.id])
-    .then(([rows, fields]) => {
-      res.status(200).json(rows);
+  transaction
+    .delete(req.params.id)
+    .then((data) => {
+      if (data == 0) {
+        res.status(404).json({
+          success: false,
+          error: "Transaction not found.",
+        });
+      } else {
+        res.status(200).json(data);
+      }
     })
     .catch((err) => {
       console.log(err);
       res.status(500).json({
         success: false,
-        error: "Server error. Please try again later",
+        error: "Could not delete transaction. Please try again later.",
       });
     });
 };
