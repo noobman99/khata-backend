@@ -1,14 +1,21 @@
-const mysql2 = require("mysql2");
+const mssql = require("mssql");
+
 require("dotenv").config();
 
-const pool = mysql2.createPool({
-  host: process.env.SQL_DB_HOST,
-  user: process.env.SQL_DB_USER,
-  password: process.env.SQL_DB_PASS,
-  database: process.env.SQL_DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
+const config = {
+  user: process.env.MSSQL_DB_USER,
+  password: process.env.MSSQL_DB_PASS,
+  server: process.env.MSSQL_DB_HOST,
+  database: process.env.MSSQL_DB_NAME,
+  port: process.env.MSSQL_DB_PORT,
+  authentication: {
+    type: "default",
+  },
+  options: {
+    encrypt: true,
+  },
+};
 
-module.exports = pool.promise();
+const pool = new mssql.ConnectionPool(config);
+
+module.exports = pool;
