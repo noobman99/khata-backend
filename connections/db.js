@@ -7,7 +7,7 @@ const config = {
   password: process.env.MSSQL_DB_PASS,
   server: process.env.MSSQL_DB_HOST,
   database: process.env.MSSQL_DB_NAME,
-  port: process.env.MSSQL_DB_PORT,
+  port: Number(process.env.MSSQL_DB_PORT),
   authentication: {
     type: "default",
   },
