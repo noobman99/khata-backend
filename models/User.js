@@ -19,6 +19,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  categories: {
+    type: [String],
+    default: [],
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

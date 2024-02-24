@@ -54,7 +54,13 @@ exports.signup = async (req, res, next) => {
   try {
     user = await User.create({ username, email, password: hash, tId });
     const token = createToken(user._id);
-    res.status(201).json({ success: true, token, username });
+    res.status(201).json({
+      success: true,
+      token,
+      username,
+      email,
+      categories: user.categories,
+    });
   } catch (err) {
     if (user) {
       User.findByIdAndDelete(user._id);
@@ -81,5 +87,13 @@ exports.login = async (req, res, next) => {
   }
 
   const token = createToken(user._id);
-  res.status(200).json({ success: true, token, username: user.username });
+  res
+    .status(200)
+    .json({
+      success: true,
+      token,
+      username: user.username,
+      email,
+      categories: user.categories,
+    });
 };

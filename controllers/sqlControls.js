@@ -1,4 +1,5 @@
 const Transaction = require("../models/Transaction");
+const User = require("../models/User");
 
 exports.getTransactions = async (req, res, next) => {
   var transaction;
@@ -29,6 +30,7 @@ exports.getTransactions = async (req, res, next) => {
 
 exports.newTransaction = async (req, res, next) => {
   var transaction;
+  const basecategs = ["Food", "Travel", "Shopping"];
 
   try {
     transaction = new Transaction(req.tId);
@@ -42,7 +44,16 @@ exports.newTransaction = async (req, res, next) => {
 
   transaction
     .insert(req.body.amount, req.body.reason, req.body.date, req.body.category)
-    .then((data) => {
+    .then(async (data) => {
+      let user = await User.findOne({ tId: req.tId });
+      let categories = user.categories;
+
+      if (!basecategs.concat(categories).includes(req.body.category)) {
+        categories.push(req.body.category);
+        user.categories = categories;
+        user.save();
+      }
+
       res.status(200).json(data);
     })
     .catch((err) => {
@@ -56,6 +67,7 @@ exports.newTransaction = async (req, res, next) => {
 
 exports.updateTransaction = async (req, res, next) => {
   var transaction;
+  const basecategs = ["Food", "Travel", "Shopping"];
 
   try {
     transaction = new Transaction(req.tId);
@@ -75,13 +87,22 @@ exports.updateTransaction = async (req, res, next) => {
       req.body.category,
       req.params.id
     )
-    .then((data) => {
+    .then(async (data) => {
       if (data == 0) {
         res.status(404).json({
           success: false,
           error: "Could not update transaction. Please try again later.",
         });
       } else {
+        let user = await User.findOne({ tId: req.tId });
+        let categories = user.categories;
+
+        if (!basecategs.concat(categories).includes(req.body.category)) {
+          categories.push(req.body.category);
+          user.categories = categories;
+          user.save();
+        }
+
         res.status(200).json(data);
       }
     })
