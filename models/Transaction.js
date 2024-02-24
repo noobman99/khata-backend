@@ -15,8 +15,8 @@ class Transaction {
     this.usid = usid;
   }
 
-  async insert(cost, reason, date, category) {
-    const insertQuery = `INSERT INTO transactions (usid, cost, reason, date, category) VALUES (@usid, @cost, @reason, @date, @category)`;
+  async insert(amount, reason, date, category) {
+    const insertQuery = `INSERT INTO transactions (usid, amount, reason, date, category) VALUES (@usid, @amount, @reason, @date, @category)`;
 
     const pool1 = await pool.connect();
     const request = new mssql.Request(pool1);
@@ -26,22 +26,21 @@ class Transaction {
     try {
       result = await request
         .input("usid", mssql.Char, this.usid)
-        .input("cost", mssql.Int, cost)
+        .input("amount", mssql.Int, amount)
         .input("reason", mssql.VarChar, reason)
         .input("date", mssql.Char, date)
         .input("category", mssql.VarChar, category)
         .query(insertQuery);
-      console.log("Transaction added");
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       throw new Error("Server error. Please try again later");
     }
 
     return result.rowsAffected[0];
   }
 
-  async update(cost, reason, date, category, id) {
-    const updateQuery = `UPDATE transactions SET cost = @cost, reason = @reason, date = @date, category = @category WHERE rowid = @id and usid = @usid`;
+  async update(amount, reason, date, category, id) {
+    const updateQuery = `UPDATE transactions SET amount = @amount, reason = @reason, date = @date, category = @category WHERE rowid = @id and usid = @usid`;
 
     const pool1 = await pool.connect();
     const request = new mssql.Request(pool1);
@@ -50,16 +49,15 @@ class Transaction {
 
     try {
       result = await request
-        .input("cost", mssql.Int, cost)
+        .input("amount", mssql.Int, amount)
         .input("reason", mssql.VarChar, reason)
         .input("date", mssql.Char, date)
         .input("category", mssql.VarChar, category)
         .input("id", mssql.Int, id)
         .input("usid", mssql.Char, this.usid)
         .query(updateQuery);
-      console.log("Transaction updated");
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       throw new Error("Server error. Please try again later");
     }
 
@@ -78,9 +76,8 @@ class Transaction {
       result = await request
         .input("usid", mssql.Char, this.usid)
         .query(getAllQuery);
-      console.log("Transaction fetched");
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       throw new Error("Server error. Please try again later");
     }
 
@@ -100,9 +97,8 @@ class Transaction {
         .input("id", mssql.Int, id)
         .input("usid", mssql.Char, this.usid)
         .query(deleteQuery);
-      console.log("Transaction deleted");
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       throw new Error("Server error. Please try again later");
     }
 

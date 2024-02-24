@@ -47,13 +47,12 @@ exports.signup = async (req, res, next) => {
     tId = RandomString(15);
     user = await User.findOne({ tId });
   } while (user);
-  console.log(tId);
+  // console.log(tId);
 
   user = null;
 
   try {
     user = await User.create({ username, email, password: hash, tId });
-    await Transaction.createTable(tId);
     const token = createToken(user._id);
     res.status(201).json({ success: true, token, username });
   } catch (err) {
