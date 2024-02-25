@@ -16,8 +16,8 @@ app.post("/login", authControls.login);
 app.use("/transactions", transactionRoutes);
 
 mongoose.connect(process.env.MONGO_DB_URI).then(() => {
-  console.log("Connected to MongoDB");
-  app.listen(process.env.NODE_PORT);
+  // console.log("Connected to MongoDB");
+  app.listen(process.env.PORT);
 });
 // app.listen(process.env.NODE_PORT);
 // console.log(`Listening on port ${process.env.NODE_PORT}`);
