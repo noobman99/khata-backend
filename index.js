@@ -12,6 +12,9 @@ app.use(express.json());
 
 app.post("/signup", authControls.signup);
 app.post("/login", authControls.login);
+app.get("/", (req, res) => {
+  res.send("Hello from the server");
+});
 
 app.use("/transactions", transactionRoutes);
 
