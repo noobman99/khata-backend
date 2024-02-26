@@ -2,6 +2,7 @@ const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 
 exports.getTransactions = async (req, res, next) => {
+  console.log("getTransactions");
   var transaction;
 
   try {
@@ -29,6 +30,7 @@ exports.getTransactions = async (req, res, next) => {
 };
 
 exports.newTransaction = async (req, res, next) => {
+  console.log("newTransaction");
   var transaction;
   const basecategs = ["Food", "Travel", "Shopping"];
 
@@ -66,6 +68,8 @@ exports.newTransaction = async (req, res, next) => {
 };
 
 exports.updateTransaction = async (req, res, next) => {
+  console.log("updateTransaction");
+
   var transaction;
   const basecategs = ["Food", "Travel", "Shopping"];
 
@@ -116,6 +120,8 @@ exports.updateTransaction = async (req, res, next) => {
 };
 
 exports.deleteTransaction = async (req, res, next) => {
+  console.log("deleteTransaction");
+
   var transaction;
 
   try {

@@ -23,6 +23,8 @@ const RandomString = (length) => {
 };
 
 exports.signup = async (req, res, next) => {
+  console.log("signup");
+
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -70,6 +72,8 @@ exports.signup = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
+  console.log("login");
+
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -87,13 +91,11 @@ exports.login = async (req, res, next) => {
   }
 
   const token = createToken(user._id);
-  res
-    .status(200)
-    .json({
-      success: true,
-      token,
-      username: user.username,
-      email,
-      categories: user.categories,
-    });
+  res.status(200).json({
+    success: true,
+    token,
+    username: user.username,
+    email,
+    categories: user.categories,
+  });
 };
