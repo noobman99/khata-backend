@@ -24,7 +24,7 @@ exports.getTransactions = async (req, res, next) => {
       console.log(err);
       res.status(500).json({
         success: false,
-        error: err.message,
+        error: "Could not get transactions. Please try later.",
       });
     });
 };
@@ -62,7 +62,7 @@ exports.newTransaction = async (req, res, next) => {
       console.log(err);
       res.status(500).json({
         success: false,
-        error: err.message,
+        error: "Could not insert transaction. Please try again later.",
       });
     });
 };
