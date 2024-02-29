@@ -24,19 +24,25 @@ class Transaction {
     var result = {};
 
     try {
-      result = await request
+      await request
         .input("usid", mssql.Char, this.usid)
         .input("amount", mssql.Int, amount)
         .input("reason", mssql.VarChar, reason)
         .input("date", mssql.Char, date)
         .input("category", mssql.VarChar, category)
         .query(insertQuery);
+
+      result = await new mssql.Request(pool1)
+        .input("usid", mssql.Char, this.usid)
+        .query(`SELECT max(rowid) FROM transactions WHERE usid = @usid`);
+
+      // console.log(result);
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       throw new Error("Server error. Please try again later");
     }
 
-    return result.rowsAffected[0];
+    return { insertId: result.recordset[0][""] };
   }
 
   async update(amount, reason, date, category, id) {
@@ -57,7 +63,7 @@ class Transaction {
         .input("usid", mssql.Char, this.usid)
         .query(updateQuery);
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       throw new Error("Server error. Please try again later");
     }
 
@@ -92,7 +98,7 @@ class Transaction {
         .input("usid", mssql.Char, this.usid)
         .query(getAllQuery);
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       throw new Error("Server error. Please try again later");
     }
 
@@ -113,7 +119,7 @@ class Transaction {
         .input("usid", mssql.Char, this.usid)
         .query(deleteQuery);
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       throw new Error("Server error. Please try again later");
     }
 

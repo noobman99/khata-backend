@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 app.use("/transactions", transactionRoutes);
 
 console.log("Connecting to MongoDB...");
-console.log(process.env.PORT);
+// console.log(process.env.PORT);
 
 mongoose.connect(process.env.MONGO_DB_URI).then(() => {
   console.log("Connected to MongoDB, listening on PORT", process.env.PORT);
