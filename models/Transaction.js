@@ -67,7 +67,22 @@ class Transaction {
   async getAll() {
     const getAllQuery = `SELECT * FROM transactions WHERE usid = @usid ORDER BY date DESC`;
 
-    const pool1 = await pool.connect();
+    // Handles case where database is inactive and hence not connected in first attempt
+    // Only done for getAll() method as expiry for token is 1hr and database will get inactive only after 1hr
+    let pool1;
+    try {
+      pool1 = await pool.connect();
+    } catch (error) {
+      if (error.code === "ETIMEOUT") {
+        try {
+          pool1 = await pool.connect();
+        } catch (error) {
+          throw error;
+        }
+      } else {
+        throw error;
+      }
+    }
     const request = new mssql.Request(pool1);
 
     var result = {};
