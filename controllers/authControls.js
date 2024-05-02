@@ -4,8 +4,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 
-const createToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+const createToken = (data) => {
+  return jwt.sign(data, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
 
 const RandomString = (length) => {
@@ -25,7 +25,13 @@ const RandomString = (length) => {
 exports.signup = async (req, res, next) => {
   console.log("signup");
 
-  const { username, email, password } = req.body;
+  try {
+    const { username, email, password } = req.body;
+  } catch (err) {
+    res
+      .status(400)
+      .json({ success: false, error: "Incorrect request format." });
+  }
 
   if (!username || !email || !password) {
     res.status(400).json({ success: false, error: "Fill all details." });
@@ -55,7 +61,7 @@ exports.signup = async (req, res, next) => {
 
   try {
     user = await User.create({ username, email, password: hash, tId });
-    const token = createToken(user._id);
+    const token = createToken({ id: user._id });
     res.status(201).json({
       success: true,
       token,
@@ -74,7 +80,13 @@ exports.signup = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   console.log("login");
 
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
+  } catch (err) {
+    res
+      .status(400)
+      .json({ success: false, error: "Incorrect request format." });
+  }
 
   if (!email || !password) {
     res.status(400).json({ success: false, error: "Fill all details." });
@@ -90,7 +102,7 @@ exports.login = async (req, res, next) => {
     return res.status(400).json({ success: false, error: "Invalid password" });
   }
 
-  const token = createToken(user._id);
+  const token = createToken({ id: user._id });
   res.status(200).json({
     success: true,
     token,
@@ -98,4 +110,80 @@ exports.login = async (req, res, next) => {
     email,
     categories: user.categories,
   });
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  console.log("forgotPassword");
+
+  try {
+    const { email } = req.body;
+  } catch (err) {
+    res
+      .status(400)
+      .json({ success: false, error: "Incorrect request format." });
+  }
+
+  if (!email) {
+    res.status(400).json({ success: false, error: "Fill all details." });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ success: false, error: "Invalid email" });
+  }
+
+  let token = RandomString(10);
+  user.resetToken = await bcrypt.hash(token, await bcrypt.genSalt(10));
+  await user.save();
+
+  token = createToken({ email, token });
+  console.log(token);
+
+  // sendMail(email, "Reset Password", token);
+
+  res.status(200).json({ success: true });
+};
+
+exports.resetPassword = async (req, res, next) => {
+  console.log("resetPassword");
+
+  try {
+    const { email, token, password } = req.body;
+  } catch (err) {
+    res
+      .status(400)
+      .json({ success: false, error: "Incorrect request format." });
+  }
+
+  if (!email || !token || !password) {
+    res.status(400).json({ success: false, error: "Fill all details." });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ success: false, error: "Invalid email" });
+  }
+
+  let verification;
+
+  try {
+    verification = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.status(400).json({ success: false, error: "Invalid token" });
+  }
+
+  const verifyToken = await bcrypt.compare(verification.token, user.resetToken);
+
+  if (!verifyToken || verification.email !== email) {
+    return res.status(400).json({ success: false, error: "Invalid token" });
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hash = await bcrypt.hash(password, salt);
+
+  user.password = hash;
+  user.resetToken = undefined;
+  await user.save();
+
+  res.status(200).json({ success: true });
 };

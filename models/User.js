@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  resetToken: {
+    type: String,
+  },
   categories: {
     type: [String],
     default: [],
