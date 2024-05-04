@@ -25,8 +25,9 @@ const RandomString = (length) => {
 exports.signup = async (req, res, next) => {
   console.log("signup");
 
+  let username, email, password;
   try {
-    const { username, email, password } = req.body;
+    ({ username, email, password } = req.body);
   } catch (err) {
     res
       .status(400)
@@ -80,8 +81,9 @@ exports.signup = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   console.log("login");
 
+  let email, password;
   try {
-    const { email, password } = req.body;
+    ({ email, password } = req.body);
   } catch (err) {
     res
       .status(400)
@@ -115,8 +117,9 @@ exports.login = async (req, res, next) => {
 exports.forgotPassword = async (req, res, next) => {
   console.log("forgotPassword");
 
+  let email;
   try {
-    const { email } = req.body;
+    ({ email } = req.body);
   } catch (err) {
     res
       .status(400)
@@ -129,7 +132,9 @@ exports.forgotPassword = async (req, res, next) => {
 
   const user = await User.findOne({ email });
   if (!user) {
-    return res.status(400).json({ success: false, error: "Invalid email" });
+    return res
+      .status(400)
+      .json({ success: false, error: "Invalid email address." });
   }
 
   let token = RandomString(10);
@@ -137,7 +142,15 @@ exports.forgotPassword = async (req, res, next) => {
   await user.save();
 
   token = createToken({ email, token });
-  console.log(token);
+
+  const url =
+    process.env.FRONTEND_URL +
+    "/reset-password?token=" +
+    token +
+    "&email=" +
+    email;
+
+  console.log(url);
 
   // sendMail(email, "Reset Password", token);
 
@@ -147,8 +160,9 @@ exports.forgotPassword = async (req, res, next) => {
 exports.resetPassword = async (req, res, next) => {
   console.log("resetPassword");
 
+  let email, token, password;
   try {
-    const { email, token, password } = req.body;
+    ({ email, token, password } = req.body);
   } catch (err) {
     res
       .status(400)
@@ -159,22 +173,25 @@ exports.resetPassword = async (req, res, next) => {
     res.status(400).json({ success: false, error: "Fill all details." });
   }
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(400).json({ success: false, error: "Invalid email" });
-  }
-
-  let verification;
-
+  let verifiedtoken;
   try {
-    verification = jwt.verify(token, process.env.JWT_SECRET);
+    verifiedtoken = jwt.verify(token, process.env.JWT_SECRET);
   } catch (err) {
     return res.status(400).json({ success: false, error: "Invalid token" });
   }
 
-  const verifyToken = await bcrypt.compare(verification.token, user.resetToken);
+  if (verifiedtoken.email !== email) {
+    return res.status(400).json({ success: false, error: "Invalid token" });
+  }
 
-  if (!verifyToken || verification.email !== email) {
+  const user = await User.findOne({ email: verifiedtoken.email });
+
+  const verifyToken = await bcrypt.compare(
+    verifiedtoken.token,
+    user.resetToken
+  );
+
+  if (!verifyToken) {
     return res.status(400).json({ success: false, error: "Invalid token" });
   }
 

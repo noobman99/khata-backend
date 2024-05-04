@@ -12,6 +12,8 @@ app.use(express.json());
 
 app.post("/signup", authControls.signup);
 app.post("/login", authControls.login);
+app.post("/forgotpassword", authControls.forgotPassword);
+app.post("/resetpassword", authControls.resetPassword);
 app.get("/", (req, res) => {
   res.send("Hello from the server");
 });
