@@ -2,7 +2,7 @@ const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const Transaction = require("../models/Transaction");
+const { sendMail } = require("../helpers/sendMail");
 
 const createToken = (data) => {
   return jwt.sign(data, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -145,16 +145,34 @@ exports.forgotPassword = async (req, res, next) => {
 
   token = createToken({ email, token });
 
-  const url =
+  const changeUrl =
     process.env.FRONTEND_URL +
     "/reset-password?token=" +
     token +
     "&email=" +
     email;
 
-  console.log(url);
+  const cancelUrl =
+    process.env.FRONTEND_URL +
+    "/cancel-reset?token=" +
+    token +
+    "&email=" +
+    email;
 
-  // sendMail(email, "Reset Password", token);
+  console.log(changeUrl);
+
+  try {
+    await sendMail(email, user.username, changeUrl, cancelUrl);
+  } catch (err) {
+    user.resetToken = undefined;
+    await user.save();
+
+    return res.status(500).json({
+      success: false,
+      error:
+        "Could not process your request at this time. Please try again later.",
+    });
+  }
 
   return res.status(200).json({
     success: true,
@@ -215,6 +233,46 @@ exports.resetPassword = async (req, res, next) => {
   const hash = await bcrypt.hash(password, salt);
 
   user.password = hash;
+  user.resetToken = undefined;
+  await user.save();
+
+  return res.status(200).json({ success: true });
+};
+
+exports.cancelReset = async (req, res, next) => {
+  console.log("cancelReset");
+
+  let email, token;
+  try {
+    ({ email, token } = req.body);
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ success: false, error: "Incorrect request format." });
+  }
+
+  if (!email || !token) {
+    return res.status(400).json({ success: false, error: "Fill all details." });
+  }
+
+  let verifiedtoken;
+  try {
+    verifiedtoken = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.status(403).json({ success: false, error: "Invalid token" });
+  }
+
+  if (verifiedtoken.email !== email) {
+    return res.status(403).json({ success: false, error: "Invalid token" });
+  }
+
+  const user = await User.findOne({ email });
+
+  // doesn't really check much since verified token will only have valid email.. but just in case our secret key is leaked
+  if (!user) {
+    return res.status(400).json({ success: false, error: "Invalid email" });
+  }
+
   user.resetToken = undefined;
   await user.save();
 
