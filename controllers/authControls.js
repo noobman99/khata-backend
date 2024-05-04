@@ -29,23 +29,25 @@ exports.signup = async (req, res, next) => {
   try {
     ({ username, email, password } = req.body);
   } catch (err) {
-    res
+    return res
       .status(400)
       .json({ success: false, error: "Incorrect request format." });
   }
 
   if (!username || !email || !password) {
-    res.status(400).json({ success: false, error: "Fill all details." });
+    return res.status(400).json({ success: false, error: "Fill all details." });
   }
 
   if (!validator.isEmail(email)) {
-    res.status(400).json({ success: false, error: "Invalid email" });
+    return res.status(400).json({ success: false, error: "Invalid email" });
   }
 
   let user = await User.findOne({ email });
 
   if (user) {
-    res.status(400).json({ success: false, error: "Email already in use" });
+    return res
+      .status(400)
+      .json({ success: false, error: "Email already in use" });
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -63,7 +65,7 @@ exports.signup = async (req, res, next) => {
   try {
     user = await User.create({ username, email, password: hash, tId });
     const token = createToken({ id: user._id });
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       token,
       username,
@@ -74,7 +76,7 @@ exports.signup = async (req, res, next) => {
     if (user) {
       User.findByIdAndDelete(user._id);
     }
-    res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
   }
 };
 
@@ -85,13 +87,13 @@ exports.login = async (req, res, next) => {
   try {
     ({ email, password } = req.body);
   } catch (err) {
-    res
+    return res
       .status(400)
       .json({ success: false, error: "Incorrect request format." });
   }
 
   if (!email || !password) {
-    res.status(400).json({ success: false, error: "Fill all details." });
+    return res.status(400).json({ success: false, error: "Fill all details." });
   }
 
   const user = await User.findOne({ email });
@@ -105,7 +107,7 @@ exports.login = async (req, res, next) => {
   }
 
   const token = createToken({ id: user._id });
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     token,
     username: user.username,
@@ -121,13 +123,13 @@ exports.forgotPassword = async (req, res, next) => {
   try {
     ({ email } = req.body);
   } catch (err) {
-    res
+    return res
       .status(400)
       .json({ success: false, error: "Incorrect request format." });
   }
 
   if (!email) {
-    res.status(400).json({ success: false, error: "Fill all details." });
+    return res.status(400).json({ success: false, error: "Fill all details." });
   }
 
   const user = await User.findOne({ email });
@@ -154,7 +156,10 @@ exports.forgotPassword = async (req, res, next) => {
 
   // sendMail(email, "Reset Password", token);
 
-  res.status(200).json({ success: true });
+  return res.status(200).json({
+    success: true,
+    message: "Password reset link has been sent to your email",
+  });
 };
 
 exports.resetPassword = async (req, res, next) => {
@@ -164,27 +169,38 @@ exports.resetPassword = async (req, res, next) => {
   try {
     ({ email, token, password } = req.body);
   } catch (err) {
-    res
+    return res
       .status(400)
       .json({ success: false, error: "Incorrect request format." });
   }
 
+  console.log(email, token, password);
+
   if (!email || !token || !password) {
-    res.status(400).json({ success: false, error: "Fill all details." });
+    return res.status(400).json({ success: false, error: "Fill all details." });
   }
 
   let verifiedtoken;
   try {
     verifiedtoken = jwt.verify(token, process.env.JWT_SECRET);
   } catch (err) {
-    return res.status(400).json({ success: false, error: "Invalid token" });
+    return res.status(403).json({ success: false, error: "Invalid token" });
   }
 
   if (verifiedtoken.email !== email) {
-    return res.status(400).json({ success: false, error: "Invalid token" });
+    return res.status(403).json({ success: false, error: "Invalid token" });
   }
 
   const user = await User.findOne({ email: verifiedtoken.email });
+
+  // doesn't really check much since verified token will only have valid email.. but just in case our secret key is leaked
+  if (!user) {
+    return res.status(403).json({ success: false, error: "Invalid email" });
+  }
+
+  if (!user.resetToken) {
+    return res.status(403).json({ success: false, error: "Invalid token" });
+  }
 
   const verifyToken = await bcrypt.compare(
     verifiedtoken.token,
@@ -192,7 +208,7 @@ exports.resetPassword = async (req, res, next) => {
   );
 
   if (!verifyToken) {
-    return res.status(400).json({ success: false, error: "Invalid token" });
+    return res.status(403).json({ success: false, error: "Invalid token" });
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -202,5 +218,5 @@ exports.resetPassword = async (req, res, next) => {
   user.resetToken = undefined;
   await user.save();
 
-  res.status(200).json({ success: true });
+  return res.status(200).json({ success: true });
 };
