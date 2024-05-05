@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { friendRequest } = require("../controllers/profileControls");
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -23,6 +24,16 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
   categories: {
+    type: [String],
+    default: [],
+    required: true,
+  },
+  friends: {
+    type: [String],
+    default: [],
+    required: true,
+  },
+  friendRequests: {
     type: [String],
     default: [],
     required: true,

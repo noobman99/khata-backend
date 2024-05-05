@@ -18,6 +18,7 @@ const authenticator = async (req, res, next) => {
 
     const user = await User.findById(id);
     req.tId = user.tId;
+    req.user = user;
     next();
   } catch (err) {
     if (err.name === "TokenExpiredError") {
