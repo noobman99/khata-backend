@@ -7,27 +7,27 @@ exports.addFriend = async (req, res, next) => {
   try {
     friendId = req.body.friendId;
   } catch (err) {
-    return res.status(400).json({ message: "Invalid request" });
+    return res.status(400).json({ error: "Invalid request" });
   }
 
   const user = req.user;
 
   if (user.friends.includes(friendId)) {
-    return res.status(400).json({ message: "Already friends" });
+    return res.status(400).json({ error: "Already friends" });
   }
 
   if (user.uId === friendId) {
-    return res.status(400).json({ message: "Cannot add self" });
+    return res.status(400).json({ error: "Cannot add self" });
   }
 
   if (!validUID(friendId)) {
-    return res.status(400).json({ message: "Invalid email" });
+    return res.status(400).json({ error: "Invalid email" });
   }
 
   const friend = await User.findOne({ uId: friendId });
 
   if (!friend) {
-    return res.status(404).json({ message: "User not found" });
+    return res.status(404).json({ error: "User not found" });
   }
 
   user.friends.push(friendId);
@@ -35,7 +35,7 @@ exports.addFriend = async (req, res, next) => {
   await user.save();
   await friend.save();
 
-  res.status(200).json({ success: true, message: "Friend added" });
+  res.status(200).json({ success: true, error: "Friend added" });
 };
 
 exports.removeFriend = async (req, res, next) => {
@@ -43,17 +43,17 @@ exports.removeFriend = async (req, res, next) => {
   try {
     friendId = req.body.friendId;
   } catch (err) {
-    return res.status(400).json({ message: "Invalid request" });
+    return res.status(400).json({ error: "Invalid request" });
   }
 
   const user = req.user;
 
   if (!user.friends.includes(friendId)) {
-    return res.status(400).json({ message: "Not friends" });
+    return res.status(400).json({ error: "Not friends" });
   }
 
   if (!validUID(friendId)) {
-    return res.status(400).json({ message: "Invalid email" });
+    return res.status(400).json({ error: "Invalid email" });
   }
 
   const friend = await User.findOne({ uId: friendId });
@@ -63,7 +63,7 @@ exports.removeFriend = async (req, res, next) => {
   await user.save();
   await friend.save();
 
-  res.status(200).json({ success: true, message: "Friend removed" });
+  res.status(200).json({ success: true, error: "Friend removed" });
 };
 
 exports.getFriends = async (req, res, next) => {
@@ -87,37 +87,37 @@ exports.friendRequest = async (req, res, next) => {
   try {
     friendId = req.body.friendId;
   } catch (err) {
-    return res.status(400).json({ message: "Invalid request" });
+    return res.status(400).json({ error: "Invalid request" });
   }
 
   const user = req.user;
 
   if (user.friends.includes(friendId)) {
-    return res.status(400).json({ message: "Already friends" });
+    return res.status(400).json({ error: "Already friends" });
   }
 
   if (user.friendRequests.includes(friendId)) {
-    return res.status(400).json({ message: "Request already sent" });
+    return res.status(400).json({ error: "Request already sent" });
   }
 
   if (user.uId === friendId) {
-    return res.status(400).json({ message: "Cannot add self" });
+    return res.status(400).json({ error: "Cannot add self" });
   }
 
   if (!validUID(friendId)) {
-    return res.status(400).json({ message: "Invalid email" });
+    return res.status(400).json({ error: "Invalid email" });
   }
 
   const friend = await User.findOne({ uId: friendId });
 
   if (!friend) {
-    return res.status(404).json({ message: "User not found" });
+    return res.status(404).json({ error: "User not found" });
   }
 
   user.friendRequests.push(friendId);
   await user.save();
 
-  res.status(200).json({ success: true, message: "Friend request sent" });
+  res.status(200).json({ success: true, error: "Friend request sent" });
 };
 
 exports.removeFriendRequest = async (req, res, next) => {
@@ -125,23 +125,23 @@ exports.removeFriendRequest = async (req, res, next) => {
   try {
     friendId = req.body.friendId;
   } catch (err) {
-    return res.status(400).json({ message: "Invalid request" });
+    return res.status(400).json({ error: "Invalid request" });
   }
 
   const user = req.user;
 
   if (!user.friendRequests.includes(friendId)) {
-    return res.status(400).json({ message: "Request not sent" });
+    return res.status(400).json({ error: "Request not sent" });
   }
 
   if (!validUID(friendId)) {
-    return res.status(400).json({ message: "Invalid email" });
+    return res.status(400).json({ error: "Invalid email" });
   }
 
   user.friendRequests = user.friendRequests.filter((f) => f !== friendId);
   await user.save();
 
-  res.status(200).json({ success: true, message: "Friend request removed" });
+  res.status(200).json({ success: true, error: "Friend request removed" });
 };
 
 exports.getFriendRequests = async (req, res, next) => {

@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 
 const transactionRoutes = require("./routes/transactionRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 const authControls = require("./controllers/authControls");
 
 const app = express();
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/transactions", transactionRoutes);
+app.use("/profile", profileRoutes);
 
 console.log("Connecting to MongoDB...");
 // console.log(process.env.PORT);
