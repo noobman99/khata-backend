@@ -1,3 +1,4 @@
+const { validUID } = require("../helpers/customValidator");
 const User = require("../models/User");
 const validator = require("validator");
 
@@ -15,22 +16,22 @@ exports.addFriend = async (req, res, next) => {
     return res.status(400).json({ message: "Already friends" });
   }
 
-  if (user.email === friendId) {
+  if (user.uId === friendId) {
     return res.status(400).json({ message: "Cannot add self" });
   }
 
-  if (!validator.isEmail(friendId)) {
+  if (!validUID(friendId)) {
     return res.status(400).json({ message: "Invalid email" });
   }
 
-  const friend = await User.findOne({ email: friendId });
+  const friend = await User.findOne({ uId: friendId });
 
   if (!friend) {
     return res.status(404).json({ message: "User not found" });
   }
 
   user.friends.push(friendId);
-  friend.friends.push(user.email);
+  friend.friends.push(user.uId);
   await user.save();
   await friend.save();
 
@@ -51,14 +52,14 @@ exports.removeFriend = async (req, res, next) => {
     return res.status(400).json({ message: "Not friends" });
   }
 
-  if (!validator.isEmail(friendId)) {
+  if (!validUID(friendId)) {
     return res.status(400).json({ message: "Invalid email" });
   }
 
-  const friend = await User.findOne({ email: friendId });
+  const friend = await User.findOne({ uId: friendId });
 
   user.friends = user.friends.filter((f) => f !== friendId);
-  friend.friends = friend.friends.filter((f) => f !== user.email);
+  friend.friends = friend.friends.filter((f) => f !== user.uId);
   await user.save();
   await friend.save();
 
@@ -71,8 +72,11 @@ exports.getFriends = async (req, res, next) => {
   let friends = [];
 
   for (let i = 0; i < user.friends.length; i++) {
-    let friend = await User.findOne({ email: user.friends[i] });
-    friends.push({ email: friend.email, username: friend.username });
+    let friend = await User.findOne({ uId: user.friends[i] });
+    friends.push({
+      username: friend.username,
+      uId: friend.uId,
+    });
   }
 
   res.status(200).json({ friends });
@@ -96,15 +100,15 @@ exports.friendRequest = async (req, res, next) => {
     return res.status(400).json({ message: "Request already sent" });
   }
 
-  if (user.email === friendId) {
+  if (user.uId === friendId) {
     return res.status(400).json({ message: "Cannot add self" });
   }
 
-  if (!validator.isEmail(friendId)) {
+  if (!validUID(friendId)) {
     return res.status(400).json({ message: "Invalid email" });
   }
 
-  const friend = await User.findOne({ email: friendId });
+  const friend = await User.findOne({ uId: friendId });
 
   if (!friend) {
     return res.status(404).json({ message: "User not found" });
@@ -130,7 +134,7 @@ exports.removeFriendRequest = async (req, res, next) => {
     return res.status(400).json({ message: "Request not sent" });
   }
 
-  if (!validator.isEmail(friendId)) {
+  if (!validUID(friendId)) {
     return res.status(400).json({ message: "Invalid email" });
   }
 
@@ -147,7 +151,10 @@ exports.getFriendRequests = async (req, res, next) => {
 
   for (let i = 0; i < user.friendRequests.length; i++) {
     let friend = await User.findOne({ email: user.friendRequests[i] });
-    friendRequests.push({ email: friend.email, username: friend.username });
+    friendRequests.push({
+      username: friend.username,
+      uId: friend.uId,
+    });
   }
 
   res.status(200).json({ requests: friendRequests });
@@ -160,6 +167,7 @@ exports.getProfile = async (req, res, next) => {
     email: user.email,
     username: user.username,
     categories: user.categories,
+    uId: user.uId,
   };
 
   res.status(200).json({ user: userInfo });

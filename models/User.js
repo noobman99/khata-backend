@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema({
   resetToken: {
     type: String,
   },
+  uId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   categories: {
     type: [String],
     default: [],

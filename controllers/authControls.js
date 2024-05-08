@@ -60,10 +60,16 @@ exports.signup = async (req, res, next) => {
   } while (user);
   // console.log(tId);
 
+  let uId;
+  do {
+    uId = "USR" + RandomString(7);
+    user = await User.findOne({ uId });
+  } while (user);
+
   user = null;
 
   try {
-    user = await User.create({ username, email, password: hash, tId });
+    user = await User.create({ username, email, password: hash, tId, uId });
     const token = createToken({ id: user._id });
     return res.status(201).json({
       success: true,
@@ -71,6 +77,7 @@ exports.signup = async (req, res, next) => {
       username,
       email,
       categories: user.categories,
+      uId,
     });
   } catch (err) {
     if (user) {
@@ -113,6 +120,7 @@ exports.login = async (req, res, next) => {
     username: user.username,
     email,
     categories: user.categories,
+    uId: user.uId,
   });
 };
 
