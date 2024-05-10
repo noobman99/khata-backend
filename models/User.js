@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const { friendRequest } = require("../controllers/profileControls");
 
 const userSchema = new mongoose.Schema({
   username: {

@@ -20,6 +20,14 @@ exports.addFriend = async (req, res, next) => {
     return res.status(400).json({ error: "Cannot add self" });
   }
 
+  if (!user.friendRequests.includes(friendId)) {
+    return res
+      .status(400)
+      .json({
+        error: "Cannot add them as friend. Ask them to send a request.",
+      });
+  }
+
   if (!validUID(friendId)) {
     return res.status(400).json({ error: "Invalid email" });
   }
@@ -31,6 +39,7 @@ exports.addFriend = async (req, res, next) => {
   }
 
   user.friends.push(friendId);
+  user.friendRequests = user.friendRequests.filter((f) => f !== friendId);
   friend.friends.push(user.uId);
   await user.save();
   await friend.save();
@@ -79,7 +88,7 @@ exports.getFriends = async (req, res, next) => {
     });
   }
 
-  res.status(200).json({ friends });
+  res.status(200).json(friends);
 };
 
 exports.friendRequest = async (req, res, next) => {
@@ -96,10 +105,6 @@ exports.friendRequest = async (req, res, next) => {
     return res.status(400).json({ error: "Already friends" });
   }
 
-  if (user.friendRequests.includes(friendId)) {
-    return res.status(400).json({ error: "Request already sent" });
-  }
-
   if (user.uId === friendId) {
     return res.status(400).json({ error: "Cannot add self" });
   }
@@ -108,14 +113,18 @@ exports.friendRequest = async (req, res, next) => {
     return res.status(400).json({ error: "Invalid email" });
   }
 
-  const friend = await User.findOne({ uId: friendId });
+  const friend = (await User.find({ uId: friendId }))[0];
 
   if (!friend) {
     return res.status(404).json({ error: "User not found" });
   }
 
-  user.friendRequests.push(friendId);
-  await user.save();
+  if (friend.friendRequests.includes(user.uId)) {
+    return res.status(400).json({ error: "Request already sent" });
+  }
+
+  friend.friendRequests.push(user.uId);
+  await friend.save();
 
   res.status(200).json({ success: true, error: "Friend request sent" });
 };
@@ -129,6 +138,8 @@ exports.removeFriendRequest = async (req, res, next) => {
   }
 
   const user = req.user;
+
+  console.log(user.friendRequests, friendId);
 
   if (!user.friendRequests.includes(friendId)) {
     return res.status(400).json({ error: "Request not sent" });
@@ -150,14 +161,14 @@ exports.getFriendRequests = async (req, res, next) => {
   let friendRequests = [];
 
   for (let i = 0; i < user.friendRequests.length; i++) {
-    let friend = await User.findOne({ email: user.friendRequests[i] });
+    let friend = await User.findOne({ uId: user.friendRequests[i] });
     friendRequests.push({
       username: friend.username,
       uId: friend.uId,
     });
   }
 
-  res.status(200).json({ requests: friendRequests });
+  res.status(200).json(friendRequests);
 };
 
 exports.getProfile = async (req, res, next) => {
