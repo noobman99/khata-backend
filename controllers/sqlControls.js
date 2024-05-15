@@ -1,3 +1,4 @@
+const { formatTransaction } = require("../helpers/dataFormatter");
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 
@@ -18,7 +19,9 @@ exports.getTransactions = async (req, res, next) => {
   transaction
     .getAll()
     .then((data) => {
-      res.status(200).json(data);
+      res
+        .status(200)
+        .json(data.map((transaction) => formatTransaction(transaction)));
     })
     .catch((err) => {
       console.log(err);
