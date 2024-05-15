@@ -15,8 +15,8 @@ class Transaction {
     this.usid = usid;
   }
 
-  async insert(amount, reason, date, category) {
-    const insertQuery = `INSERT INTO transactions (usid, amount, reason, date, category) VALUES (@usid, @amount, @reason, @date, @category)`;
+  async insert(amount, reason, date, category, isexpense) {
+    const insertQuery = `INSERT INTO transactions (usid, amount, reason, date, category, isexpense) VALUES (@usid, @amount, @reason, @date, @category, @isexpense)`;
 
     const pool1 = await pool.connect();
     const request = new mssql.Request(pool1);
@@ -30,6 +30,7 @@ class Transaction {
         .input("reason", mssql.VarChar, reason)
         .input("date", mssql.Char, date)
         .input("category", mssql.VarChar, category)
+        .input("isexpense", mssql.Bit, isexpense)
         .query(insertQuery);
 
       result = await new mssql.Request(pool1)

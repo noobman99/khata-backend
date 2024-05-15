@@ -45,7 +45,13 @@ exports.newTransaction = async (req, res, next) => {
   }
 
   transaction
-    .insert(req.body.amount, req.body.reason, req.body.date, req.body.category)
+    .insert(
+      req.body.amount,
+      req.body.reason,
+      req.body.date,
+      req.body.category,
+      req.body.isexpense
+    )
     .then(async (data) => {
       let user = await User.findOne({ tId: req.tId });
       let categories = user.categories;
