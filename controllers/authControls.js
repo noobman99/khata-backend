@@ -76,7 +76,7 @@ exports.signup = async (req, res, next) => {
       token,
       username,
       email,
-      categories: user.categories,
+      expCategories: user.categories,
       uId,
     });
   } catch (err) {
@@ -119,7 +119,7 @@ exports.login = async (req, res, next) => {
     token,
     username: user.username,
     email,
-    categories: user.categories,
+    expCategories: user.categories,
     uId: user.uId,
   });
 };

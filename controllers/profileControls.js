@@ -21,11 +21,9 @@ exports.addFriend = async (req, res, next) => {
   }
 
   if (!user.friendRequests.includes(friendId)) {
-    return res
-      .status(400)
-      .json({
-        error: "Cannot add them as friend. Ask them to send a request.",
-      });
+    return res.status(400).json({
+      error: "Cannot add them as friend. Ask them to send a request.",
+    });
   }
 
   if (!validUID(friendId)) {
@@ -177,7 +175,7 @@ exports.getProfile = async (req, res, next) => {
   let userInfo = {
     email: user.email,
     username: user.username,
-    categories: user.categories,
+    expCategories: user.categories,
     uId: user.uId,
   };
 
