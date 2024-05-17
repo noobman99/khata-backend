@@ -175,7 +175,8 @@ exports.getProfile = async (req, res, next) => {
   let userInfo = {
     email: user.email,
     username: user.username,
-    expCategories: user.categories,
+    expCategories: user.expCategories,
+    incCategories: user.incCategories,
     uId: user.uId,
   };
 

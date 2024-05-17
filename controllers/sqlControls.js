@@ -57,11 +57,21 @@ exports.newTransaction = async (req, res, next) => {
     )
     .then(async (data) => {
       let user = await User.findOne({ tId: req.tId });
-      let categories = user.categories;
+      let categories;
 
-      if (!basecategs.concat(categories).includes(req.body.category)) {
+      if (req.body.isexpense) {
+        categories = basecategs.concat(user.expCategories);
+      } else {
+        categories = user.incCategories;
+      }
+
+      if (!categories.includes(req.body.category)) {
         categories.push(req.body.category);
-        user.categories = categories;
+        if (req.body.isexpense) {
+          user.expCategories = categories;
+        } else {
+          user.incCategories = categories;
+        }
         user.save();
       }
 
@@ -108,11 +118,21 @@ exports.updateTransaction = async (req, res, next) => {
         });
       } else {
         let user = await User.findOne({ tId: req.tId });
-        let categories = user.categories;
+        let categories;
 
-        if (!basecategs.concat(categories).includes(req.body.category)) {
+        if (req.body.isexpense) {
+          categories = basecategs.concat(user.expCategories);
+        } else {
+          categories = user.incCategories;
+        }
+
+        if (!categories.includes(req.body.category)) {
           categories.push(req.body.category);
-          user.categories = categories;
+          if (req.body.isexpense) {
+            user.expCategories = categories;
+          } else {
+            user.incCategories = categories;
+          }
           user.save();
         }
 

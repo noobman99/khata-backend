@@ -27,7 +27,12 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  categories: {
+  expCategories: {
+    type: [String],
+    default: [],
+    required: true,
+  },
+  incCategories: {
     type: [String],
     default: [],
     required: true,
