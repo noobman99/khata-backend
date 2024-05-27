@@ -15,8 +15,8 @@ class Borrowing {
     this.usid = usid;
   }
 
-  async insert(amount, reason, date, person) {
-    const insertQuery = `INSERT INTO borrowings (usid, amount, reason, date, person) VALUES (@usid, @amount, @reason, @date, @person)`;
+  async insert(amount, reason, date, borrower) {
+    const insertQuery = `INSERT INTO borrowings (usid, amount, reason, date, borrower) VALUES (@usid, @amount, @reason, @date, @borrower)`;
 
     const pool1 = await pool.connect();
     const request = new mssql.Request(pool1);
@@ -29,7 +29,7 @@ class Borrowing {
         .input("amount", mssql.Int, amount)
         .input("reason", mssql.VarChar, reason)
         .input("date", mssql.Char, date)
-        .input("person", mssql.VarChar, person)
+        .input("borrower", mssql.VarChar, borrower)
         .query(insertQuery);
 
       result = await new mssql.Request(pool1)
@@ -45,7 +45,7 @@ class Borrowing {
     return { insertId: result.recordset[0][""] };
   }
 
-  async update(amount, reason, date, person, id) {
+  async update(amount, reason, date, id) {
     const updateQuery = `UPDATE borrowings SET amount = @amount, reason = @reason, date = @date WHERE rowid = @id and usid = @usid`;
 
     const pool1 = await pool.connect();
@@ -58,7 +58,7 @@ class Borrowing {
         .input("amount", mssql.Int, amount)
         .input("reason", mssql.VarChar, reason)
         .input("date", mssql.Char, date)
-        .input("person", mssql.VarChar, person)
+        .input("id", mssql.Int, id)
         .input("usid", mssql.Char, this.usid)
         .query(updateQuery);
     } catch (error) {
@@ -111,7 +111,7 @@ class Borrowing {
   }
 
   async getAllBorrowed() {
-    const selectQuery = `SELECT * FROM borrowings WHERE person = @usid`;
+    const selectQuery = `SELECT * FROM borrowings WHERE borrower = @usid`;
 
     const pool1 = await pool.connect();
     const request = new mssql.Request(pool1);

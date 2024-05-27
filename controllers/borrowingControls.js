@@ -68,11 +68,11 @@ exports.getBorrowings = async (req, res, next) => {
 
 exports.newBorrowing = async (req, res, next) => {
   console.log("newBorrowing");
-  const { amount, reason, date, person } = req.body;
+  const { amount, reason, date, borrower } = req.body;
 
-  let borrower = await User.findOne({ uId: person }, "tId");
+  let _borrower = await User.findOne({ uId: borrower }, "tId");
 
-  if (!borrower) {
+  if (!_borrower) {
     res.status(404).json({
       success: false,
       error: "Person not found.",
@@ -81,10 +81,10 @@ exports.newBorrowing = async (req, res, next) => {
     return;
   }
 
-  const borrowing = new Borrowing(req.tId, amount, reason, date, borrower.tId);
+  const borrowing = new Borrowing(req.tId);
 
   borrowing
-    .add()
+    .insert(amount, reason, date, _borrower.tId)
     .then((data) => {
       res.status(200).json(data);
     })
@@ -99,11 +99,13 @@ exports.newBorrowing = async (req, res, next) => {
 
 exports.updateBorrowing = async (req, res, next) => {
   console.log("updateBorrowing");
-  const { amount, reason, date, person } = req.body;
-  const borrowing = new Borrowing(req.tId, amount, reason, date, person);
+  const { amount, reason, date } = req.body;
+  const id = req.params.id;
+
+  const borrowing = new Borrowing(req.tId);
 
   borrowing
-    .update(req.params.id)
+    .update(amount, reason, date, id)
     .then((data) => {
       if (data == 0) {
         res.status(404).json({
